@@ -92,7 +92,24 @@ public class ProjectController {
 
     }
 
+//endpoint for submitting Project preferences:
+    @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
+    @PostMapping("/{projectId}/preferences/{userId}")
+    public ResponseEntity<Project> submitProjectPreference(@PathVariable Long projectId,
+                                                           @PathVariable Long userId,
+                                                           @RequestParam int preferenceRank) {
+        Project project = projectService.submitProjectPreference(projectId, userId, preferenceRank);
+        return ResponseEntity.ok(project);
+    }
 
+//endpoint for qssigning user to project:
+//    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
+//    @PostMapping("/{projectId}/assign/{userId}")
+//    public ResponseEntity<Project> assignUserToProject(@PathVariable Long projectId,
+//                                                       @PathVariable Long userId) {
+//        Project project = projectService.assignUserToProject(projectId, userId);
+//        return ResponseEntity.ok(project);
+//    }
 
 
 }

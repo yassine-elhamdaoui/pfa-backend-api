@@ -22,7 +22,10 @@ public interface ProjectService {
     Project deleteFile(Long id,  Long docId) throws NotFoundException, IOException;
     void validateToken(String approvalToken);
 
+    ///
+    public Project submitProjectPreference(Long projectId, Long userId, int preferenceRank);
+//    public Project assignUserToProject(Long projectId, Long userId);
 
-    
-    
-}
+
+
+    }

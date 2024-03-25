@@ -56,7 +56,7 @@ public class AuthenticationService {
             .cin(request.getCin())
             .inscriptionNumber(request.getInscriptionNumber())
             .phoneNumber(request.getPhoneNumber())
-            .enabled(true)
+            .enabled(false)//enabled(true)--->just to try with a deactivated acc=the acc that has been just created is by defaultt enabled
             .build();
 
         user.getRoles().add(userRole);

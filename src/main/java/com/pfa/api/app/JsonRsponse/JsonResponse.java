@@ -1,7 +1,5 @@
 package com.pfa.api.app.JsonRsponse;
 
-
-
 public class JsonResponse {
     
         private final int code;

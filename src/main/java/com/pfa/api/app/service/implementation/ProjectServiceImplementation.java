@@ -9,9 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.pfa.api.app.entity.user.TeamPreference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -172,5 +174,34 @@ public class ProjectServiceImplementation implements ProjectService {
 
         }
     }
+///
+    public Project submitProjectPreference(Long projectId, Long userId, int preferenceRank) {
+        Optional<Project> optionalProject = projectRepository.findById(projectId);
+        Optional<User> optionalUser = userRepository.findById(userId);
+//the project and the user should exist before submit process:
+        if (optionalProject.isEmpty() || optionalUser.isEmpty()) {
+            throw new RuntimeException("Project or user not found");
+        }
+
+        Project project = optionalProject.get();
+        User user = optionalUser.get();
+
+        // Create TeamPreference entity and save it
+        TeamPreference teamPreference = new TeamPreference();
+        teamPreference.setUser(user);
+        teamPreference.setProject(project);
+        teamPreference.setPreferenceRank(preferenceRank);
+
+        // Save teamPreference in the database
+        // ...
+
+        return project; // Return the project after updating preferences
+    }
+
+//    public Project assignUserToProject(Long projectId, Long userId) {
+//        // Assign the user to the project based on preferences and availability
+//        // Update project status or other relevant fields
+//
+//    }
 
 }
