@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.pfa.api.app.entity.Branch;
 import com.pfa.api.app.entity.Project;
+import com.pfa.api.app.entity.Team;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,15 +41,12 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(
-    name = "user",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"email","cin","inscription_number"})
-)
-public class User implements UserDetails{
+@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = { "email", "cin", "inscription_number" }))
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id" , length = 45)
+    @Column(name = "id", length = 45)
     private long id;
 
     @Column(name = "first_name")
@@ -57,36 +55,33 @@ public class User implements UserDetails{
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email" , nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "phone_number" )
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "cin" )
+    @Column(name = "cin")
     private String cin;
 
-    @Column(name = "inscription_number" )
+    @Column(name = "inscription_number")
     private String inscriptionNumber;
 
     @Column(name = "password")
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
-    
+
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
-    
+
     @Column(name = "enabled")
     private Boolean enabled;
 
     @ManyToOne(targetEntity = Branch.class)
     @JoinColumn(name = "branch_id")
     private Branch studiedBranch;
-    
+
     @OneToOne(mappedBy = "headOfBranch")
     private Branch branch;
 
@@ -95,21 +90,26 @@ public class User implements UserDetails{
 
     @ManyToMany(mappedBy = "profs")
     private List<Branch> branches;
-    
+
     @ManyToMany(mappedBy = "supervisors")
     @JsonIgnore
-    private List<Project>  projects ;
+    private List<Project> projects;
 
+    @ManyToOne
+    @JoinColumn(name = "team_id")
+    private Team team;
+
+    @OneToOne(mappedBy = "responsible")
+    private Team tEam;
 
     @Override
-   public Collection<GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName().toString()));
         }
         return authorities;
     }
-
 
     @Override
     public String getUsername() {
@@ -130,7 +130,7 @@ public class User implements UserDetails{
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
-       
+
     }
 
     @Override
@@ -140,12 +140,10 @@ public class User implements UserDetails{
 
     // @Override
     // public int hashCode() {
-    //     final int prime = 31;
-    //     int result = 1;
-    //     result = prime * result + ((email == null) ? 0 : email.hashCode());
-    //     return result;
+    // final int prime = 31;
+    // int result = 1;
+    // result = prime * result + ((email == null) ? 0 : email.hashCode());
+    // return result;
     // }
-
-
 
 }
