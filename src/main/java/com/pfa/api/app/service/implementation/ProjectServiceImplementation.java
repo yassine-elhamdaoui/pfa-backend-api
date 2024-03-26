@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.pfa.api.app.entity.user.TeamPreference;
+import com.pfa.api.app.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
@@ -24,10 +25,6 @@ import com.pfa.api.app.entity.Project;
 import com.pfa.api.app.entity.user.Role;
 import com.pfa.api.app.entity.user.RoleName;
 import com.pfa.api.app.entity.user.User;
-import com.pfa.api.app.repository.BranchRepository;
-import com.pfa.api.app.repository.DocumentRepository;
-import com.pfa.api.app.repository.ProjectRepository;
-import com.pfa.api.app.repository.UserRepository;
 import com.pfa.api.app.service.ProjectService;
 import com.pfa.api.app.util.FileUtils;
 import com.pfa.api.app.util.UserUtils;
@@ -46,6 +43,7 @@ public class ProjectServiceImplementation implements ProjectService {
     private final BranchRepository branchRepository;
     private final ProjectRepository projectRepository;
     private final DocumentRepository documentRepository;
+    private final ProjectPreferenceRepository projectPreferenceRepository;
 
     @SuppressWarnings("null")
     @Override
@@ -193,7 +191,7 @@ public class ProjectServiceImplementation implements ProjectService {
         teamPreference.setPreferenceRank(preferenceRank);
 
         // Save teamPreference in the database
-        // ...
+        projectPreferenceRepository.save(teamPreference);
 
         return project; // Return the project after updating preferences
     }
