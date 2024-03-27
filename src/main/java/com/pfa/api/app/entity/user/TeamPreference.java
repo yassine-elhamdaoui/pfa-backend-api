@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.Map;
 
 @Entity
+@Table
 @Setter
 @Getter
 public class TeamPreference {
