@@ -30,5 +30,5 @@ public interface ProjectService {
     void validateToken(String approvalToken);
 
     ///
-    public Project submitProjectPreference(Map<Long, Integer> projectPreferences) throws NotFoundException;
+    public String submitProjectPreference(Map<Long, Integer> projectPreferences) throws NotFoundException;
 }

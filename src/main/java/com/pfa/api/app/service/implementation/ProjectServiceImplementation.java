@@ -171,7 +171,7 @@ public class ProjectServiceImplementation implements ProjectService {
 
     ///
     @Override
-    public Project submitProjectPreference(Map<Long, Integer> projectPreferences) throws NotFoundException {
+    public String submitProjectPreference(Map<Long, Integer> projectPreferences) throws NotFoundException {
         Optional<User> optionalUser = userRepository.findById(UserUtils.getCurrentUser(userRepository).getId());
 
         if (optionalUser.isEmpty()) {
@@ -188,7 +188,7 @@ public class ProjectServiceImplementation implements ProjectService {
 
         //(#)this one will be replaced with Project theHead_of_branch will choose for thi group!
         //for now we return an mpty project till (#) will be done
-        return new Project();
+    return "Team preferences submitted successfully !!";
     }
 }
 

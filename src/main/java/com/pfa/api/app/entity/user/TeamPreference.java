@@ -12,6 +12,7 @@ import java.util.Map;
 @Setter
 @Getter
 public class TeamPreference {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
