@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Map;
+
 @Entity
 @Setter
 @Getter
@@ -17,9 +19,11 @@ public class TeamPreference {
     @ManyToOne
     private User user;
 
-    @ManyToOne
-    private Project project;
-
-    private int preferenceRank;
+    @ElementCollection
+    @CollectionTable(name = "team_preference_project_rank",
+            joinColumns = {@JoinColumn(name = "team_preference_id", referencedColumnName = "id")})
+    @MapKeyJoinColumn(name = "project_id")
+    @Column(name = "preference_rank", columnDefinition = "int default 0")
+    private Map<Long, Integer> projectPreferenceRanks;
 
 }

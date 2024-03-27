@@ -2,6 +2,7 @@ package com.pfa.api.app.controller;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
@@ -33,83 +34,70 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProjectController {
 
-   private final ProjectService projectService;
+    private final ProjectService projectService;
 
-   @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
-   @PostMapping
+    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
+    @PostMapping
     public ResponseEntity<JsonResponse> createNewProject(@ModelAttribute ProjectDTO projectDTO,
-                                                         @RequestParam("files") List<MultipartFile> files) throws  AccessDeniedException, NotFoundException{
+                                                         @RequestParam("files") List<MultipartFile> files) throws AccessDeniedException, NotFoundException {
 
         Project project = projectService.addProject(projectDTO, files);
         return new ResponseEntity<JsonResponse>(
                 new JsonResponse(201, "Project has been created successfully!"), HttpStatus.CREATED);
     }
 
-   @GetMapping
-   public ResponseEntity<List<Project>> getProjects() throws NotFoundException {
-      List<Project> projects = projectService.getAllProject();
+    @GetMapping
+    public ResponseEntity<List<Project>> getProjects() throws NotFoundException {
+        List<Project> projects = projectService.getAllProject();
 
-      return ResponseEntity.ok(projects);
-   }
+        return ResponseEntity.ok(projects);
+    }
 
-   @GetMapping("/{id}")
-   public ResponseEntity<Project> getProjectById(@PathVariable Long id) throws NotFoundException {
-      Project project = projectService.getProject(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<Project> getProjectById(@PathVariable Long id) throws NotFoundException {
+        Project project = projectService.getProject(id);
 
-      return ResponseEntity.ok(project);
+        return ResponseEntity.ok(project);
 
-   }
+    }
 
-   @PutMapping("/{id}")
-   @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
-   public ResponseEntity<JsonResponse> updateProject(@RequestBody ProjectDTO projectDTO, @PathVariable long id) throws NotFoundException {
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
+    public ResponseEntity<JsonResponse> updateProject(@RequestBody ProjectDTO projectDTO, @PathVariable long id) throws NotFoundException {
 
-      projectService.updateProject(projectDTO, id);
-      return new ResponseEntity<JsonResponse>(
-            new JsonResponse(201, "Project has been Updated successfully!"), HttpStatus.OK);
+        projectService.updateProject(projectDTO, id);
+        return new ResponseEntity<JsonResponse>(
+                new JsonResponse(201, "Project has been Updated successfully!"), HttpStatus.OK);
 
-   }
+    }
 
-   @DeleteMapping("/{id}/docs/{docId}")
-   @PreAuthorize("hasAnyRole('ROLE_SUPERVISOR','ROLE_RESPONSIBLE')")
-   public ResponseEntity<Project> deleteFile(@PathVariable Long id, @PathVariable Long docId) throws NotFoundException, IOException{
-      
-      return new ResponseEntity<Project>(projectService.deleteFile(id, docId), HttpStatus.OK);
-   }
+    @DeleteMapping("/{id}/docs/{docId}")
+    @PreAuthorize("hasAnyRole('ROLE_SUPERVISOR','ROLE_RESPONSIBLE')")
+    public ResponseEntity<Project> deleteFile(@PathVariable Long id, @PathVariable Long docId) throws NotFoundException, IOException {
+
+        return new ResponseEntity<Project>(projectService.deleteFile(id, docId), HttpStatus.OK);
+    }
 
 
-   
     @GetMapping("/accept")
-    public ModelAndView acceptProject(@RequestParam("token") String approvalToken){
-         projectService.validateToken(approvalToken);
+    public ModelAndView acceptProject(@RequestParam("token") String approvalToken) {
+        projectService.validateToken(approvalToken);
         ModelAndView modelAndView = new ModelAndView();
 
         // return new ResponseEntity<JsonResponse>(new JsonResponse(200, "you account has been confirmed"), HttpStatus.OK);
-        modelAndView.setViewName("accept-project"); 
+        modelAndView.setViewName("accept-project");
         modelAndView.setStatus(HttpStatus.OK);
-        
+
         return modelAndView;
 
     }
 
-//endpoint for submitting Project preferences:
+
+    //endpoint for submitting Project preferences:
     @PreAuthorize("hasRole('ROLE_RESPONSIBLE')")
-    @PostMapping("/{projectId}/preferences/{userId}")
-    public ResponseEntity<Project> submitProjectPreference(@PathVariable Long projectId,
-                                                           @PathVariable Long userId,
-                                                           @RequestParam int preferenceRank) {
-        Project project = projectService.submitProjectPreference(projectId, userId, preferenceRank);
+    @PostMapping("/preferences")
+    public ResponseEntity<Project> submitProjectPreference(@RequestBody Map<Long, Integer> projectPreferences) throws NotFoundException {
+        Project project = projectService.submitProjectPreference(projectPreferences);
         return ResponseEntity.ok(project);
     }
-
-//endpoint for qssigning user to project:
-//    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
-//    @PostMapping("/{projectId}/assign/{userId}")
-//    public ResponseEntity<Project> assignUserToProject(@PathVariable Long projectId,
-//                                                       @PathVariable Long userId) {
-//        Project project = projectService.assignUserToProject(projectId, userId);
-//        return ResponseEntity.ok(project);
-//    }
-
-
 }

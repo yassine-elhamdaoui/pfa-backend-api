@@ -3,18 +3,15 @@ package com.pfa.api.app.service.implementation;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.pfa.api.app.entity.user.TeamPreference;
 import com.pfa.api.app.repository.*;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,8 +19,6 @@ import com.pfa.api.app.dto.ProjectDTO;
 import com.pfa.api.app.entity.Branch;
 import com.pfa.api.app.entity.Document;
 import com.pfa.api.app.entity.Project;
-import com.pfa.api.app.entity.user.Role;
-import com.pfa.api.app.entity.user.RoleName;
 import com.pfa.api.app.entity.user.User;
 import com.pfa.api.app.service.ProjectService;
 import com.pfa.api.app.util.FileUtils;
@@ -37,8 +32,9 @@ public class ProjectServiceImplementation implements ProjectService {
 
     @Value("${upload.directory}")
     public String DIRECTORY;
-    
-    private final EmailServiceImplementation  emailService;
+    private final Map<Long, List<TeamPreference>> userPreferences = new HashMap<>();//this one is for storing user preferences y by order in a HashMap
+
+    private final EmailServiceImplementation emailService;
     private final UserRepository userRepository;
     private final BranchRepository branchRepository;
     private final ProjectRepository projectRepository;
@@ -50,7 +46,7 @@ public class ProjectServiceImplementation implements ProjectService {
     public Project addProject(ProjectDTO projectDTO, List<MultipartFile> files)
             throws NotFoundException, AccessDeniedException {
         User owner = UserUtils.getCurrentUser(userRepository);
-        Branch branch =  branchRepository.findById(projectDTO.getBranch()).get();
+        Branch branch = branchRepository.findById(projectDTO.getBranch()).get();
         List<User> supervisors = new ArrayList<>();
         supervisors = findSupervisors(projectDTO.getSupervisors());
         supervisors.add(owner);
@@ -73,7 +69,7 @@ public class ProjectServiceImplementation implements ProjectService {
         if (!files.isEmpty()) {
             FileUtils.saveDocuments(files, savedProject, DIRECTORY, documentRepository);
         }
-        
+
 
         // email shit for the project approval
         // emailService.sendProjectApprovalEmail(savedProject);
@@ -89,14 +85,14 @@ public class ProjectServiceImplementation implements ProjectService {
 
     @Override
     public List<Project> getAllProject() throws NotFoundException {
-        User currentUser = UserUtils.getCurrentUser(userRepository); 
+        User currentUser = UserUtils.getCurrentUser(userRepository);
         Boolean isHeadOfBranch = UserUtils.isHeadOfBranch(currentUser);
         return isHeadOfBranch == true ? projectRepository.findAll() : projectRepository.findByIsPublicTrue();
     }
 
     @SuppressWarnings("null")
     @Override
-    public Project updateProject(ProjectDTO projectDTO, Long id ) throws NotFoundException {
+    public Project updateProject(ProjectDTO projectDTO, Long id) throws NotFoundException {
         Optional<Project> optionalProject = projectRepository.findById(id);
         Project project = optionalProject.orElseThrow(NotFoundException::new);
 
@@ -109,7 +105,7 @@ public class ProjectServiceImplementation implements ProjectService {
         if (projectDTO.getCodeLink() != null) {
             project.setCodeLink(projectDTO.getCodeLink());
         }
-        if (projectDTO.getStatus()!= null) {
+        if (projectDTO.getStatus() != null) {
             project.setStatus(projectDTO.getTitle());
         }
         if (projectDTO.getTechStack() != null) {
@@ -172,34 +168,28 @@ public class ProjectServiceImplementation implements ProjectService {
 
         }
     }
-///
-    public Project submitProjectPreference(Long projectId, Long userId, int preferenceRank) {
-        Optional<Project> optionalProject = projectRepository.findById(projectId);
-        Optional<User> optionalUser = userRepository.findById(userId);
-//the project and the user should exist before submit process:
-        if (optionalProject.isEmpty() || optionalUser.isEmpty()) {
-            throw new RuntimeException("Project or user not found");
+
+    ///
+    @Override
+    public Project submitProjectPreference(Map<Long, Integer> projectPreferences) throws NotFoundException {
+        Optional<User> optionalUser = userRepository.findById(UserUtils.getCurrentUser(userRepository).getId());
+
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("User not found");
         }
 
-        Project project = optionalProject.get();
         User user = optionalUser.get();
 
-        // Create TeamPreference entity and save it
         TeamPreference teamPreference = new TeamPreference();
         teamPreference.setUser(user);
-        teamPreference.setProject(project);
-        teamPreference.setPreferenceRank(preferenceRank);
+        teamPreference.setProjectPreferenceRanks(projectPreferences);
 
-        // Save teamPreference in the database
         projectPreferenceRepository.save(teamPreference);
 
-        return project; // Return the project after updating preferences
+        //(#)this one will be replaced with Project theHead_of_branch will choose for thi group!
+        //for now we return an mpty project till (#) will be done
+        return new Project();
     }
-
-//    public Project assignUserToProject(Long projectId, Long userId) {
-//        // Assign the user to the project based on preferences and availability
-//        // Update project status or other relevant fields
-//
-//    }
-
 }
+
+
