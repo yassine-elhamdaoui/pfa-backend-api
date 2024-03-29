@@ -16,7 +16,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.pfa.api.app.entity.Branch;
 import com.pfa.api.app.entity.Project;
-import com.pfa.api.app.entity.Team;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,12 +42,15 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = { "email", "cin", "inscription_number" }))
-public class User implements UserDetails {
+@Table(
+    name = "user",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"email","cin","inscription_number"})
+)
+public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", length = 45)
+    @Column(name = "id" , length = 45)
     private long id;
 
     @Column(name = "first_name")
@@ -57,27 +59,34 @@ public class User implements UserDetails {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email" , nullable = false)
     private String email;
 
-    @Column(name = "phone_number")
+    @Column(name = "phone_number" )
     private String phoneNumber;
 
-    @Column(name = "cin")
+    @Column(name = "cin" )
     private String cin;
 
-    @Column(name = "inscription_number")
+    @Column(name = "inscription_number" )
     private String inscriptionNumber;
 
     @Column(name = "password")
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
-
+    
     @ManyToMany(fetch = FetchType.EAGER)
+<<<<<<< HEAD
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     @JsonIgnore
+=======
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id"))
+>>>>>>> parent of ae32e42 (adding the ability to create team ans assign members to it)
     private List<Role> roles;
-
+    
     @Column(name = "enabled")
     private Boolean enabled;
 
@@ -85,7 +94,7 @@ public class User implements UserDetails {
     @JoinColumn(name = "branch_id")
     @JsonIgnore
     private Branch studiedBranch;
-
+    
     @OneToOne(mappedBy = "headOfBranch")
     @JsonIgnore
     private Branch branch;
@@ -95,11 +104,12 @@ public class User implements UserDetails {
 
     @ManyToMany(mappedBy = "profs")
     private List<Branch> branches;
-
+    
     @ManyToMany(mappedBy = "supervisors")
     @JsonIgnore
-    private List<Project> projects;
+    private List<Project>  projects ;
 
+<<<<<<< HEAD
     @ManyToOne(targetEntity = Team.class)
     @JoinColumn(name = "team_id")
     @JsonIgnore
@@ -108,15 +118,18 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "responsible")
     @JsonIgnore
     private Team teamInResponsibility;
+=======
+>>>>>>> parent of ae32e42 (adding the ability to create team ans assign members to it)
 
     @Override
-    public Collection<GrantedAuthority> getAuthorities() {
+   public Collection<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName().toString()));
         }
         return authorities;
     }
+
 
     @Override
     public String getUsername() {
@@ -137,7 +150,7 @@ public class User implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
-
+       
     }
 
     @Override
@@ -147,10 +160,16 @@ public class User implements UserDetails {
 
     // @Override
     // public int hashCode() {
-    // final int prime = 31;
-    // int result = 1;
-    // result = prime * result + ((email == null) ? 0 : email.hashCode());
-    // return result;
+    //     final int prime = 31;
+    //     int result = 1;
+    //     result = prime * result + ((email == null) ? 0 : email.hashCode());
+    //     return result;
     // }
 
+<<<<<<< HEAD
 }
+=======
+
+
+}
+>>>>>>> parent of ae32e42 (adding the ability to create team ans assign members to it)
