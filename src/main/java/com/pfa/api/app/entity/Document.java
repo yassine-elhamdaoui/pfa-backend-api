@@ -3,20 +3,16 @@ package com.pfa.api.app.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,7 +26,7 @@ public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @Column(name = "doc_name")
     private String docName;
@@ -46,4 +42,9 @@ public class Document {
     @OneToOne(mappedBy = "report")
     @JsonBackReference
     private Project reportOf;
+
+
+//    @OneToMany(mappedBy = "document" , cascade = CascadeType.ALL)              //mappedBy = "document" <=>specifies that the relationship will be managed by document field in the Comment entity/cascade = CascadeType.ALL<=>when i update a documents  ===>its associated comments will be updated
+//    private List<Comment> comments=new ArrayList<>();
+
 }
