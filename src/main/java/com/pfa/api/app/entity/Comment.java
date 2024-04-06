@@ -1,4 +1,6 @@
 package com.pfa.api.app.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.pfa.api.app.dto.CommentDTO;
 import com.pfa.api.app.entity.user.User;
 import jakarta.persistence.*;
@@ -27,9 +29,11 @@ public class Comment {
     private LocalDateTime date;    //date_when_comment_was_published!!!
 
     @ManyToOne
+    @JsonBackReference
     private User author;    //which_supervisor_has_added_this_comment
 
     @ManyToOne
+    @JsonBackReference
     private Document document;
 
 

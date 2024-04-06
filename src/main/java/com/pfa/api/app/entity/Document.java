@@ -45,6 +45,7 @@ public class Document {
 
 
     @OneToMany(mappedBy = "document" , cascade = CascadeType.ALL)              //mappedBy = "document" <=>specifies that the relationship will be managed by document field in the Comment entity/cascade = CascadeType.ALL<=>when i update a documents  ===>its associated comments will be updated
+    @JsonManagedReference
     private List<Comment> comments=new ArrayList<>();
 
 }

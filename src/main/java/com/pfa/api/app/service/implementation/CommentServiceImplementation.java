@@ -3,6 +3,7 @@ package com.pfa.api.app.service.implementation;
 import com.pfa.api.app.dto.CommentDTO;
 import com.pfa.api.app.entity.Comment;
 import com.pfa.api.app.entity.Document;
+import com.pfa.api.app.entity.Project;
 import com.pfa.api.app.entity.user.User;
 import com.pfa.api.app.repository.CommentRepository;
 import com.pfa.api.app.repository.DocumentRepository;
@@ -14,14 +15,8 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import java.text.DateFormat;
-import java.text.spi.DateFormatProvider;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 
@@ -54,21 +49,39 @@ public class CommentServiceImplementation implements CommentService {
 
     @Override
     public Comment getCommentById(Long id) {
-        return null;
+
+        return commentRepository.findById(id).get();
     }
 
     @Override
     public List<Comment> getComments() {
-        return null;
+
+        return commentRepository.findAll();
+    }
+
+
+    @Override
+    public Comment updateComment(CommentDTO commentDTO, Long id) throws ChangeSetPersister.NotFoundException {
+
+        Comment comment = commentRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+
+        User user = UserUtils.getCurrentUser(userRepository);
+        comment.setAuthor(user);
+
+        Document document = documentRepository.findById(commentDTO.getDocumentId()).get();
+        comment.setDocument(document);
+
+        comment.setDate(LocalDateTime.now());
+
+        comment.setText(commentDTO.getText());
+
+        comment=commentRepository.save(comment);
+        return comment;
+
     }
 
     @Override
-    public Comment updateComment(CommentDTO commentDTO, Long id) {
-        return null;
-    }
-
-    @Override
-    public Comment deleteComment(Long id) {
-        return null;
+    public void deleteComment(CommentDTO commentDTO) {
+        commentRepository.delete(Comment.dtoToEntity(commentDTO));
     }
 }

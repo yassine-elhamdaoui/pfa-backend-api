@@ -11,7 +11,6 @@ public interface CommentService {
     public Comment addComment(CommentDTO commentDTO) throws ChangeSetPersister.NotFoundException;
     public Comment getCommentById(Long id);
     public List<Comment> getComments();
-    public Comment updateComment(CommentDTO commentDTO,Long id);
-    public Comment deleteComment(Long id);
-
+    public Comment updateComment(CommentDTO commentDTO, Long id) throws ChangeSetPersister.NotFoundException;
+     void deleteComment(CommentDTO commentDTO);
 }
