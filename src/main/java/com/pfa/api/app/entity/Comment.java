@@ -1,10 +1,10 @@
 package com.pfa.api.app.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.pfa.api.app.dto.CommentDTO;
 import com.pfa.api.app.entity.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -24,13 +24,13 @@ public class Comment {
     private String text;   //comment_text
 
     @Column(name = "date")
-    private Date date;    //date_when_comment_was_published!!!
+    private LocalDateTime date;    //date_when_comment_was_published!!!
 
-//    @ManyToOne
-//    @JoinColumn(name = "user_id")
-    private Long authorId;    //which_supervisor_has_added_this_comment
+    @ManyToOne
+    private User author;    //which_supervisor_has_added_this_comment
 
-    private Long docId;
+    @ManyToOne
+    private Document document;
 
 
     //convert to be able to save a Comment using JPA<Comment,Long>  wich we
@@ -39,7 +39,6 @@ public class Comment {
         return Comment.builder()
                 .id(commentDTO.getId())
                 .text(commentDTO.getText())
-                .docId(commentDTO.getDocId())
                 .build();
     }
 }

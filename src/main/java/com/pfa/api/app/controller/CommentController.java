@@ -21,7 +21,7 @@ public class CommentController {
 
 
     @PostMapping
-//    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
+    @PreAuthorize("hasRole('ROLE_SUPERVISOR')")
     public ResponseEntity<JsonResponse> addNewComment(@RequestBody CommentDTO commentDTO) throws ChangeSetPersister.NotFoundException {
         Comment comment=commentService.addComment(commentDTO);
         return new ResponseEntity<JsonResponse>(new JsonResponse(

@@ -44,7 +44,7 @@ public class Document {
     private Project reportOf;
 
 
-//    @OneToMany(mappedBy = "document" , cascade = CascadeType.ALL)              //mappedBy = "document" <=>specifies that the relationship will be managed by document field in the Comment entity/cascade = CascadeType.ALL<=>when i update a documents  ===>its associated comments will be updated
-//    private List<Comment> comments=new ArrayList<>();
+    @OneToMany(mappedBy = "document" , cascade = CascadeType.ALL)              //mappedBy = "document" <=>specifies that the relationship will be managed by document field in the Comment entity/cascade = CascadeType.ALL<=>when i update a documents  ===>its associated comments will be updated
+    private List<Comment> comments=new ArrayList<>();
 
 }

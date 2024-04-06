@@ -15,7 +15,7 @@ import java.util.Date;
 public class CommentDTO {
     private Long id;
     private String text;
-    private Long docId;
+    private Long documentId;
 
 
 }
