@@ -1,24 +1,24 @@
 package com.pfa.api.app.service.implementation;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+
 import com.pfa.api.app.dto.CommentDTO;
 import com.pfa.api.app.entity.Comment;
 import com.pfa.api.app.entity.Document;
-import com.pfa.api.app.entity.Project;
 import com.pfa.api.app.entity.user.User;
 import com.pfa.api.app.repository.CommentRepository;
 import com.pfa.api.app.repository.DocumentRepository;
 import com.pfa.api.app.repository.UserRepository;
 import com.pfa.api.app.service.CommentService;
 import com.pfa.api.app.util.UserUtils;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static java.time.format.DateTimeFormatter.ofLocalizedDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class CommentServiceImplementation implements CommentService {
 
     @Override
     public Comment addComment(CommentDTO commentDTO)
-            throws AccessDeniedException, ChangeSetPersister.NotFoundException {
+            throws AccessDeniedException, NotFoundException {
 
         User user = UserUtils.getCurrentUser(userRepository);
         Comment comment=Comment.dtoToEntity(commentDTO);//=id+text+document
@@ -55,23 +55,20 @@ public class CommentServiceImplementation implements CommentService {
 
     @Override
     public List<Comment> getComments() {
-
         return commentRepository.findAll();
     }
 
 
     @Override
-    public Comment updateComment(CommentDTO commentDTO, Long id) throws ChangeSetPersister.NotFoundException {
+    public Comment updateComment(CommentDTO commentDTO, Long id) throws NotFoundException {
 
-        Comment comment = commentRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+        Comment comment = commentRepository.findById(id).orElseThrow(NotFoundException::new);
 
         User user = UserUtils.getCurrentUser(userRepository);
         comment.setAuthor(user);
 
         Document document = documentRepository.findById(commentDTO.getDocumentId()).get();
         comment.setDocument(document);
-
-        comment.setDate(LocalDateTime.now());
 
         comment.setText(commentDTO.getText());
 
@@ -81,7 +78,14 @@ public class CommentServiceImplementation implements CommentService {
     }
 
     @Override
-    public void deleteComment(CommentDTO commentDTO) {
-        commentRepository.delete(Comment.dtoToEntity(commentDTO));
+    public void deleteComment(Long id) throws NotFoundException {
+        Optional<Comment> optionalComment = commentRepository.findById(id);
+        if (optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            commentRepository.delete(comment);
+            return;
+        } else {
+            throw new NotFoundException();
+        }
     }
 }

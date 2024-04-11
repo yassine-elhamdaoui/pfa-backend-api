@@ -41,7 +41,6 @@ public class Comment {
     // receive in form of CommentDTOin the request
     public static Comment dtoToEntity(CommentDTO commentDTO){
         return Comment.builder()
-                .id(commentDTO.getId())
                 .text(commentDTO.getText())
                 .build();
     }

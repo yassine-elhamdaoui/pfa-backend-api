@@ -53,9 +53,16 @@ public class CommentController {
         return new ResponseEntity<Comment>(comment,HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public void deleteComment(@RequestBody CommentDTO commentDTO){
-        commentService.deleteComment(commentDTO);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<JsonResponse> deleteComment(@PathVariable Long id) throws ChangeSetPersister.NotFoundException {
+        commentService.deleteComment(id);
+        return new ResponseEntity<JsonResponse>(
+                new JsonResponse(
+                        200,
+                        "comment deleted successfully")
+                ,
+                HttpStatus.OK
+        );
     }
 
 
