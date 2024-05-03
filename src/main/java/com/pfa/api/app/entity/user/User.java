@@ -16,9 +16,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.pfa.api.app.entity.Branch;
 import com.pfa.api.app.entity.JoinRequest;
+import com.pfa.api.app.entity.Notification;
 import com.pfa.api.app.entity.Project;
 import com.pfa.api.app.entity.Team;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -29,6 +31,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -44,15 +47,12 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(
-    name = "user",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"email","cin","inscription_number"})
-)
-public class User implements UserDetails{
+@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = { "email", "cin", "inscription_number" }))
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id" , length = 45)
+    @Column(name = "id", length = 45)
     private long id;
 
     @Column(name = "first_name")
@@ -61,30 +61,27 @@ public class User implements UserDetails{
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email" , nullable = false ,unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone_number" )
+    @Column(name = "phone_number")
     private String phoneNumber;
 
-    @Column(name = "cin" ,unique = true )
+    @Column(name = "cin", unique = true)
     private String cin;
 
-    @Column(name = "inscription_number" ,unique = true)
+    @Column(name = "inscription_number", unique = true)
     private String inscriptionNumber;
 
     @Column(name = "password")
     @JsonProperty(access = Access.WRITE_ONLY)
     private String password;
-    
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id"))
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
-    
+
     @Column(name = "enabled")
     private Boolean enabled;
 
@@ -92,7 +89,7 @@ public class User implements UserDetails{
     @JoinColumn(name = "branch_id")
     @JsonManagedReference
     private Branch studiedBranch;
-    
+
     @OneToOne(mappedBy = "headOfBranch")
     @JsonManagedReference
     private Branch branch;
@@ -102,10 +99,10 @@ public class User implements UserDetails{
 
     @ManyToMany(mappedBy = "profs")
     private List<Branch> branches;
-    
+
     @ManyToMany(mappedBy = "supervisors")
     @JsonIgnore
-    private List<Project>  projects ;
+    private List<Project> projects;
 
     @ManyToOne(targetEntity = Team.class)
     @JoinColumn(name = "team_id")
@@ -116,19 +113,22 @@ public class User implements UserDetails{
     @JsonBackReference
     private Team teamInResponsibility;
 
-    @OneToOne(targetEntity = JoinRequest.class )
-    @JoinColumn(name = "join_request_id" , nullable = true)
+    @OneToOne(targetEntity = JoinRequest.class)
+    @JoinColumn(name = "join_request_id", nullable = true)
     private JoinRequest joinRequest;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonBackReference
+    private List<Notification> notifications;
+
     @Override
-   public Collection<GrantedAuthority> getAuthorities() {
+    public Collection<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
         for (Role role : roles) {
             authorities.add(new SimpleGrantedAuthority(role.getName().toString()));
         }
         return authorities;
     }
-
 
     @Override
     public String getUsername() {
@@ -149,7 +149,7 @@ public class User implements UserDetails{
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
-       
+
     }
 
     @Override
@@ -157,13 +157,12 @@ public class User implements UserDetails{
         return enabled;
     }
 
-
     // @Override
     // public int hashCode() {
-    //     final int prime = 31;
-    //     int result = 1;
-    //     result = prime * result + ((email == null) ? 0 : email.hashCode());
-    //     return result;
+    // final int prime = 31;
+    // int result = 1;
+    // result = prime * result + ((email == null) ? 0 : email.hashCode());
+    // return result;
     // }
 
 }
