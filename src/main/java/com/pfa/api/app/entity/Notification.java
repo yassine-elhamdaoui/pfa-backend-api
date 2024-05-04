@@ -23,9 +23,10 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
     private String description;
     private Date creationDate;
+    private String nameOfSender;
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

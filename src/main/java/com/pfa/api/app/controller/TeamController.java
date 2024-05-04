@@ -1,7 +1,9 @@
 package com.pfa.api.app.controller;
 
+import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.pfa.api.app.JsonRsponse.JsonResponse;
 import com.pfa.api.app.dto.requests.TeamDTO;
+import com.pfa.api.app.dto.responses.NotificationResponseDTO;
 import com.pfa.api.app.dto.responses.TeamResponseDTO;
+import com.pfa.api.app.dto.responses.UserResponseDTO;
+import com.pfa.api.app.entity.Notification;
 import com.pfa.api.app.entity.Team;
+import com.pfa.api.app.entity.user.User;
+import com.pfa.api.app.repository.NotificationRepository;
+import com.pfa.api.app.service.NotificationService;
 import com.pfa.api.app.service.TeamService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,6 +36,8 @@ import lombok.RequiredArgsConstructor;
 public class TeamController {
 
     private final TeamService teamService;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @GetMapping
     public ResponseEntity<List<TeamResponseDTO>> getAllTeams() {
@@ -60,6 +70,6 @@ public class TeamController {
     public ResponseEntity<JsonResponse> deleteTeamById(@PathVariable Long id) {
         teamService.deleteTeamById(id);
         return new ResponseEntity<JsonResponse>(
-            new JsonResponse(200, "Team deleted successfully"), HttpStatus.OK);
+                new JsonResponse(200, "Team deleted successfully"), HttpStatus.OK);
     }
 }

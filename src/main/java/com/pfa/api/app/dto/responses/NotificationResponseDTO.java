@@ -12,18 +12,20 @@ import com.pfa.api.app.entity.Notification;
 @Setter
 public class NotificationResponseDTO {
     private Long id;
-    private String title;
     private String description;
     private Date creationDate;
     private Long userId;
+    private String nameOfSender;
+    private String type;
 
     public static NotificationResponseDTO fromEntity(Notification notification) {
         return NotificationResponseDTO.builder()
                 .id(notification.getId())
-                .title(notification.getTitle())
                 .description(notification.getDescription())
                 .creationDate(notification.getCreationDate())
                 .userId(notification.getUser().getId())
+                .nameOfSender(notification.getNameOfSender())
+                .type(notification.getType())
                 .build();
     }
 }
