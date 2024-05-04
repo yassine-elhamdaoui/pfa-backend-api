@@ -1,6 +1,5 @@
 package com.pfa.api.app.service.implementation;
 
-
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -17,24 +16,24 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class BacklogServiceImplementation implements BacklogService{
-     private final UserStoryRepository userStoryRepository;
-     private final BacklogRepository backlogRepository;
+public class BacklogServiceImplementation implements BacklogService {
+    private final UserStoryRepository userStoryRepository;
+    private final BacklogRepository backlogRepository;
+
     @Override
-    public Backlog  AddBacklog(Backlog backlog) {
-    
+    public Backlog AddBacklog(Backlog backlog) {
+
         return backlogRepository.save(backlog);
-       
+
     }
+
     @Override
     public BacklogResponseDTO getBacklogById(Long id) {
         Backlog backlog = backlogRepository.findById(id).orElseThrow(
-            () -> new RuntimeException("Backlog not found")
-        );
-
+                () -> new RuntimeException("Backlog not found"));
 
         return BacklogResponseDTO.fromEntity(backlog);
-       
+
     }
-    
+
 }

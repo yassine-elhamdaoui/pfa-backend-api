@@ -115,65 +115,110 @@ public class TeamServiceImplementation implements TeamService {
         // Récupérer l'équipe à modifier de la base de données
         Team existingTeam = teamRepository.findById(teamId).orElseThrow(NotFoundException::new);
 
+        // Récupérer le nom complet de l'ancien responsable
+        String oldResponsibleName = existingTeam.getResponsible().getFirstName() + " "
+                + existingTeam.getResponsible().getLastName();
+
         // Vérifier si l'utilisateur actuel est le responsable de l'équipe
         User currentUser = UserUtils.getCurrentUser(userRepository);
         if (!currentUser.equals(existingTeam.getResponsible())) {
             throw new RuntimeException("Only the responsible of the team can update it");
         }
 
-        // Supprimer les anciens membres de l'équipe et mettre à jour les références
-        // croisées dans la table User
-        for (User member : existingTeam.getMembers()) {
-            member.setTeam(null); // Mettre à null la référence à l'équipe dans chaque utilisateur
+        // Mettre à jour le nom de l'équipe si présent dans le DTO et différent de la
+        // valeur actuelle
+        if (teamDTO.getName() != null && !teamDTO.getName().equals(existingTeam.getName())) {
+            existingTeam.setName(teamDTO.getName());
         }
-        existingTeam.setMembers(null);
 
-        // Mettre à null le responsable de l'équipe et mettre à jour les références
-        // croisées dans la table User
-        if (existingTeam.getResponsible() != null) {
-            existingTeam.getResponsible().setTeam(null); // Mettre à null la référence à l'équipe dans l'ancien
-                                                         // responsable
-            currentUser.getRoles().remove(roleRepository.findByName(RoleName.ROLE_RESPONSIBLE.toString()).get());
+        if (teamDTO.getNewResponsible() != null
+                && !teamDTO.getNewResponsible().equals(existingTeam.getResponsible().getId())) {
+            Long newResponsibleId = teamDTO.getNewResponsible();
+            User newResponsible = userRepository.findById(newResponsibleId).orElseThrow(NotFoundException::new);
 
-        }
-        existingTeam.setResponsible(null);
+            // Vérifier si le nouveau responsable fait déjà partie de l'équipe
+            if (!existingTeam.getMembers().contains(newResponsible)) {
+                // Retirer le rôle de responsable à l'ancien responsable
+                existingTeam.getResponsible().getRoles()
+                        .remove(roleRepository.findByName(RoleName.ROLE_RESPONSIBLE.toString()).get());
 
-        // Ajouter les nouveaux membres à l'équipe et mettre à jour les références
-        // croisées dans la table User
-        List<Long> newMembersIds = teamDTO.getMembersIds();
-        List<User> newMembers = new ArrayList<>();
-        for (Long memberId : newMembersIds) {
-            User member = userRepository.findById(memberId).orElseThrow(NotFoundException::new);
-            // Vérifier si le membre appartient déjà à d'autres équipes
-            if (isUserInOtherTeams(member)) {
-                throw new RuntimeException("User with id " + memberId + " is already a member of another team");
+                // Ajouter le rôle de responsable au nouveau responsable
+                newResponsible.getRoles().add(roleRepository.findByName(RoleName.ROLE_RESPONSIBLE.toString()).get());
+                // Mettre à jour le nouveau responsable et son équipe
+                existingTeam.setResponsible(newResponsible);
+                newResponsible.setTeam(existingTeam);
+            } else {
+                // Ajouter le rôle de responsable au nouveau responsable s'il fait déjà partie
+                // de l'équipe
+                newResponsible.getRoles().add(roleRepository.findByName(RoleName.ROLE_RESPONSIBLE.toString()).get());
+                existingTeam.setResponsible(newResponsible);
+
             }
-            member.setTeam(existingTeam); // Mettre à jour la référence à l'équipe dans chaque nouveau membre
-            newMembers.add(member);
+            Notification newResponsibleNotification = Notification.builder()
+                    .description("The user" + oldResponsibleName + " has assigned you as the new responsible for team "
+                            + existingTeam.getName() + ".")
+                    .creationDate(new Date())
+                    .nameOfSender(oldResponsibleName)
+                    .user(newResponsible)
+                    .type("team")
+                    .build();
+            notificationRepository.save(newResponsibleNotification);
         }
-        existingTeam.setMembers(newMembers);
 
-        // Vérifier que le nouveau responsable fait partie des nouveaux membres
-        Long newResponsibleId = teamDTO.getNewResponsible();
-        User newResponsible = newMembers.stream()
-                .filter(user -> user.getId() == newResponsibleId)
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException());
+        // Mettre à jour les membres de l'équipe si présents dans le DTO
+        if (teamDTO.getMembersIds() != null && !teamDTO.getMembersIds().isEmpty())
 
-        // Mettre à jour le responsable de l'équipe et mettre à jour les références
-        // croisées dans la table User
-        newResponsible.setTeam(existingTeam); // Mettre à jour la référence à l'équipe dans le nouveau responsable
-        newResponsible.getRoles().add(roleRepository.findByName(RoleName.ROLE_RESPONSIBLE.toString()).get());
-        existingTeam.setResponsible(newResponsible);
-        existingTeam.setName(teamDTO.getName());
+        {
+            List<User> updatedMembers = new ArrayList<>();
+            for (Long memberId : teamDTO.getMembersIds()) {
+                User member = userRepository.findById(memberId).orElseThrow(NotFoundException::new);
+                // Vérifier si le membre n'appartient à aucune équipe et n'est pas déjà présent
+                // dans l'équipe
+                if (member.getTeam() == null && !existingTeam.getMembers().contains(member)) {
+                    // Ajouter le membre à l'équipe
+                    member.setTeam(existingTeam);
+                    updatedMembers.add(member);
+
+                    // Envoyer une notification au nouveau membre
+                    Notification newMemberNotification = Notification.builder()
+                            .description("The user" + oldResponsibleName + " has added you as a member of the team "
+                                    + existingTeam.getName() + ".")
+                            .creationDate(new Date())
+                            .nameOfSender(oldResponsibleName)
+                            .user(member)
+                            .type("team")
+                            .build();
+                    notificationRepository.save(newMemberNotification);
+
+                }
+            }
+            // Mettre à jour la liste des membres de l'équipe
+            existingTeam.getMembers().addAll(updatedMembers);
+        }
+
+        // Mettre à null la référence à l'équipe pour les membres qui ne sont pas inclus
+        // dans les nouveaux membres
+        existingTeam.getMembers().stream().filter(member -> !teamDTO.getMembersIds().contains(member.getId()))
+                .forEach(member -> {
+                    member.setTeam(null);
+                    // Envoyer une notification au membre supprimé avec le nom de l'ancien
+                    // responsable dans la description
+                    if (!member.equals(currentUser)) {
+                        Notification removedMemberNotification = Notification.builder()
+                                .description("The user " + oldResponsibleName + " has removed you from the team "
+                                        + existingTeam.getName() + ". You are no longer a member of this team.")
+                                .creationDate(new Date())
+                                .nameOfSender(oldResponsibleName)
+                                .user(member)
+                                .type("team")
+                                .build();
+                        notificationRepository.save(removedMemberNotification);
+
+                    }
+
+                });
         // Enregistrer les modifications dans la base de données
         return TeamResponseDTO.fromEntity(teamRepository.save(existingTeam));
-    }
-
-    // Méthode pour vérifier si un utilisateur appartient déjà à d'autres équipes
-    private boolean isUserInOtherTeams(User user) {
-        List<Team> teams = teamRepository.findByMembersContaining(user);
-        return teams.size() > 1; // Plus de 1 signifie qu'il est dans au moins une autre équipe
     }
 
     @Override
