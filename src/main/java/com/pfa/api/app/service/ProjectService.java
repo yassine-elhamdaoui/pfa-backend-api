@@ -26,6 +26,7 @@ public interface ProjectService {
     ProjectResponseDTO getProject(Long id) throws NotFoundException;
 
     List<ProjectResponseDTO> getAllProjects(int pageNumber,int pageSize , String academicYear) throws NotFoundException;
+    List<String> getAllAcademicYears();
 
 
     ProjectResponseDTO updateProject(ProjectDTO projectDTO, Long id,

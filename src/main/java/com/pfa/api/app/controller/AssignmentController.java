@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/assignments")
 @RequiredArgsConstructor
 public class AssignmentController {
-
+    
     private final AssignmentService assignmentService;
 
     @GetMapping("/{id}")

@@ -59,6 +59,11 @@ public class ProjectController {
 
         return ResponseEntity.ok(projects);
     }
+    @GetMapping("/academicYear")
+    public List<String>getAcademicYear(){
+        List<String> academicYears = projectService.getAllAcademicYears();
+        return academicYears;
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDTO> getProjectById(@PathVariable Long id) throws NotFoundException {

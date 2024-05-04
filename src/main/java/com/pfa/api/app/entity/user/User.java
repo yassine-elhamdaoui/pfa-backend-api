@@ -19,6 +19,7 @@ import com.pfa.api.app.entity.JoinRequest;
 import com.pfa.api.app.entity.Notification;
 import com.pfa.api.app.entity.Project;
 import com.pfa.api.app.entity.Team;
+import com.pfa.api.app.entity.UserStory;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -116,11 +117,16 @@ public class User implements UserDetails {
     @OneToOne(targetEntity = JoinRequest.class)
     @JoinColumn(name = "join_request_id", nullable = true)
     private JoinRequest joinRequest;
-
+  
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonBackReference
     private List<Notification> notifications;
 
+
+    @OneToMany(mappedBy = "developer")
+    @JsonManagedReference
+    private List<UserStory> userStories ;
+  
     @Override
     public Collection<GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();

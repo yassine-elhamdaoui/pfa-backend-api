@@ -84,8 +84,18 @@ public class Project {
     @JoinColumn(name = "team_id")
     private Team team;
          
-        
 
+
+    @OneToOne
+    @JoinColumn(name = "backlog_id")
+    @JsonManagedReference
+     private Backlog backlog; 
+     
+     @OneToMany(mappedBy = "project")
+     @JsonManagedReference
+     private List<Sprint> sprints;
+    
+  
     
 }
 
