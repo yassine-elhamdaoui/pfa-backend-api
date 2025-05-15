@@ -53,7 +53,7 @@ public class AuthenticationService {
 
 
     
-    public AuthenticationResponse register(RegisterDTO request,MultipartFile image) throws SQLIntegrityConstraintViolationException ,
+    public String register(RegisterDTO request,MultipartFile image) throws SQLIntegrityConstraintViolationException ,
             PropertyValueException, NotFoundException {
                 
 
@@ -68,13 +68,15 @@ public class AuthenticationService {
                         throw new RuntimeException("CIN already in use.");
                     });
         }
-        if (request.getInscriptionNumber() != null) {
+        if (!request.getInscriptionNumber().equals("")) {
             
             userRepository.findByInscriptionNumber(request.getInscriptionNumber())
                     .ifPresent(existingUser -> {
                         throw new RuntimeException("Inscription Number already in use.");
                     });
             
+        }else {
+            request.setInscriptionNumber(null);
         }
 
         Role userRole = roleRepository.findByName(request.getRole())
@@ -129,10 +131,11 @@ public class AuthenticationService {
         emailService.sendNotificationEmailToHeadOfBranch(headOfBranch , user ,confirmation.getToken());
 
         
-        String jwtToken = jwtService.generateToken(user);
+        // String jwtToken = jwtService.generateToken(user);
 
 
-        return AuthenticationResponse.builder().token(jwtToken).build();
+        // return AuthenticationResponse.builder().token(jwtToken).build();
+        return "Account registered successfully , Your request will be sent to the head of the branch you're in to check you're credentials , you will get an email informing you about you're account's state.";
     }
 
     public AuthenticationResponse authenticate(AuthenticationDTO request) {

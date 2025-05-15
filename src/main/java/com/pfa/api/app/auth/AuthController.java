@@ -31,15 +31,15 @@ public class AuthController {
     private final AuthenticationService authenticationService;
     
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@ModelAttribute RegisterDTO request,
+    public ResponseEntity<JsonResponse> register(@ModelAttribute RegisterDTO request,
                 @RequestParam(value = "image", required = false) MultipartFile image) throws SQLIntegrityConstraintViolationException, PropertyValueException, NotFoundException{
         // using this part when i want that confirmation stuff
-        // authenticationService.register(request);
-        // return new ResponseEntity<JsonResponse>(new JsonResponse(201,
-        //         "Account registered successfully , Your request will be sent to the head of the branch you're in to check you're credentials , you will get an email informing you about you're account's state."),
-        //         HttpStatus.CREATED);
+        authenticationService.register(request,image);
+        return new ResponseEntity<JsonResponse>(new JsonResponse(201,
+                "Account registered successfully , Your request will be sent to the head of the branch you're in to check you're credentials , you will get an email informing you about you're account's state."),
+                HttpStatus.CREATED);
         
-        return ResponseEntity.ok(authenticationService.register(request,image));
+        // return ResponseEntity.ok(authenticationService.register(request,image));
     }
 
     @PostMapping("/authenticate")
